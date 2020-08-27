@@ -1,8 +1,10 @@
+const fs = require('fs')
 const path = require('path')
 const http = require('http')
 const express = require('express')
 const socket = require('socket.io');
 const formatMessage = require('./utils/messages')
+const formatLog = require('./utils/logs')
 const {userJoin, getCurrentUser, userLeave,getRoomUsers} = require('./utils/user')
 
 
@@ -39,6 +41,12 @@ io.on('connection', socket =>{
     const user = getCurrentUser(socket.id)
     //console.log(msg)
     io.to(user.room).emit('message',formatMessage(user.username ,msg))
+
+    var roomfile = user.room
+    fs.writeFile(`./logs/${roomfile}.txt`, formatLog(user.username ,msg), { flag: 'a' }, function (err) {
+      if (err) return console.log(err)
+      console.log(formatLog(user.username ,msg))
+    })
   })
   //when user disconnect
   socket.on('disconnect',()=>{
